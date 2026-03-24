@@ -84,13 +84,11 @@ function render() {
     buildChart(i, ex.history);
   });
 
-  // Show first card and render pagination
   state.currentCard = 0;
   showCard(0);
   renderPagination();
 
-  // Initialize swipe/mouse drag after cards exist
-  initDrag();
+  initDrag(); // initialize swipe/drag after cards exist
 }
 
 // ------------------------
@@ -162,7 +160,7 @@ function showCard(index) {
 // ------------------------
 function initDrag() {
   const carousel = document.getElementById("app");
-  if (!carousel) return; // <--- prevent null errors
+  if (!carousel) return; // prevent null errors
 
   let startX = 0;
   let currentTranslate = 0;
@@ -234,12 +232,35 @@ function initDrag() {
 }
 
 // ------------------------
+// Auto-refresh at midnight
+// ------------------------
+function scheduleDailyRefresh() {
+  const now = new Date();
+  const nextMidnight = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + 1,
+    0, 0, 0, 0
+  );
+
+  const msUntilMidnight = nextMidnight - now;
+  console.log(`Scheduling daily refresh in ${msUntilMidnight / 1000} seconds`);
+
+  setTimeout(() => {
+    console.log("Refreshing for new day...");
+    loadData();
+    scheduleDailyRefresh(); // reschedule
+  }, msUntilMidnight);
+}
+
+// ------------------------
 // Install Prompt (PWA)
 // ------------------------
 let deferredPrompt;
 window.addEventListener("DOMContentLoaded", () => {
   loadData();
   flushQueue();
+  scheduleDailyRefresh(); // start auto-refresh
 });
 
 // ------------------------
