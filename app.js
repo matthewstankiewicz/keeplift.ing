@@ -14,8 +14,14 @@ let state = { exercises: [] };
 
 async function loadData() {
   try {
-    const res = await fetch(getScriptURL());
+    const url = getScriptURL();
+    console.log("Fetching:", url);
+
+    const res = await fetch(url);
+    console.log("Response status:", res.status);
+
     const data = await res.json();
+    console.log("DATA:", data);
 
     document.getElementById("title").innerText = data.day;
     state.exercises = data.next;
