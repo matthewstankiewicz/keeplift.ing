@@ -1,43 +1,45 @@
-function getUserKey() {
-  let key = localStorage.getItem("workout_key");
+// ------------------------
+// api.js
+// ------------------------
 
-  if (!key) {
-    key = prompt("Enter your key:");
-    if (key) {
-      localStorage.setItem("workout_key", key);
-    }
-  }
-
-  return key;
-}
-
-function getScriptURL() {
-  const key = getUserKey();
-  return `https://script.google.com/macros/s/AKfycbxAP0EAtNUCVj97wxyUZJqQf1XHlv9XFFbbit1HBLIWY-8t0c1DZWqS-PXBDuSGB5jX5Q/exec?key=${key}`;
-}
-
+// Send log data to Google Apps Script
 async function sendLog(data) {
-  return fetch(getScriptURL(), {
-    method: "POST",
-    body: JSON.stringify(data)
-  });
+  try {
+    const res = await fetch(getScriptURL(), {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
+    if (!res.ok) throw new Error(`Status ${res.status}`);
+    return res.json();
+  } catch (err) {
+    console.warn("Failed to send log, queuing:", err);
+    queueLog(data);
+    throw err;
+  }
 }
 
+// Queue log data locally
 function queueLog(data) {
   const q = JSON.parse(localStorage.getItem("queue") || "[]");
   q.push(data);
   localStorage.setItem("queue", JSON.stringify(q));
 }
 
+// Flush queued logs when back online
 async function flushQueue() {
   const q = JSON.parse(localStorage.getItem("queue") || "[]");
   if (!q.length) return;
 
   for (const item of q) {
-    await sendLog(item);
+    try {
+      await sendLog(item);
+    } catch {
+      console.warn("Failed to flush log, will retry later");
+    }
   }
 
   localStorage.removeItem("queue");
 }
 
+// Retry queued logs when coming online
 window.addEventListener("online", flushQueue);
