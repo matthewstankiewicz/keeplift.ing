@@ -84,15 +84,7 @@ async function logSet(i) {
 // INSTALL PROMPT
 let deferredPrompt;
 
-window.addEventListener("beforeinstallprompt", e => {
-  e.preventDefault();
-  deferredPrompt = e;
-
-  document.getElementById("installBtn").onclick = () => {
-    deferredPrompt.prompt();
-    deferredPrompt = null;
-  };
+window.addEventListener("DOMContentLoaded", () => {
+  loadData();
+  flushQueue();
 });
-
-loadData();
-flushQueue();
