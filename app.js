@@ -17,7 +17,7 @@ if (!userKey) {
 let state = { exercises: [], currentCard: 0 };
 
 // ------------------------
-// Load Data from Google Apps Script
+// Load Data
 // ------------------------
 async function loadData() {
   try {
@@ -32,10 +32,7 @@ async function loadData() {
 
     document.getElementById("title").innerText = data.day || "Workout";
 
-    // Ensure exercises is always an array
     let exercises = Array.isArray(data.next) ? data.next : [];
-
-    // Filter exercises for current day
     exercises = exercises.filter(ex => !ex.day || ex.day === data.day);
 
     state.exercises = exercises;
@@ -88,11 +85,11 @@ function render() {
   showCard(0);
   renderPagination();
 
-  initDrag(); // initialize swipe/drag after cards exist
+  initDrag(); // swipe/drag
 }
 
 // ------------------------
-// Build Chart.js chart
+// Build Charts
 // ------------------------
 function buildChart(i, history) {
   if (!history || !Array.isArray(history) || !history.length) return;
@@ -131,7 +128,7 @@ async function logSet(i) {
 }
 
 // ------------------------
-// Pagination Functions
+// Pagination Dots
 // ------------------------
 function renderPagination() {
   const pagination = document.getElementById("pagination");
@@ -145,10 +142,17 @@ function renderPagination() {
   });
 }
 
+// ------------------------
+// Show Card (peek carousel)
 function showCard(index) {
   state.currentCard = index;
   const app = document.getElementById("app");
-  app.style.transform = `translateX(${-index * window.innerWidth}px)`;
+
+  // Each card width + margin ≈ 80vw + 2vw gap = 82vw
+  const cardWidth = window.innerWidth * 0.82;
+  const translateX = -index * cardWidth;
+
+  app.style.transform = `translateX(${translateX}px)`;
 
   document.querySelectorAll(".dot").forEach((dot, i) => {
     dot.classList.toggle("active", i === index);
@@ -156,17 +160,15 @@ function showCard(index) {
 }
 
 // ------------------------
-// Drag / Swipe Support
+// Drag / Swipe
 // ------------------------
 function initDrag() {
   const carousel = document.getElementById("app");
-  if (!carousel) return; // prevent null errors
+  if (!carousel) return;
 
-  let startX = 0;
-  let currentTranslate = 0;
-  let isDragging = false;
+  let startX = 0, currentTranslate = 0, isDragging = false;
 
-  // TOUCH EVENTS
+  // TOUCH
   carousel.addEventListener("touchstart", e => {
     startX = e.touches[0].clientX;
     isDragging = true;
@@ -175,29 +177,21 @@ function initDrag() {
 
   carousel.addEventListener("touchmove", e => {
     if (!isDragging) return;
-    const currentX = e.touches[0].clientX;
-    const diff = currentX - startX;
+    const diff = e.touches[0].clientX - startX;
     currentTranslate = -state.currentCard * window.innerWidth + -diff;
     carousel.style.transform = `translateX(${currentTranslate}px)`;
   });
 
   carousel.addEventListener("touchend", e => {
     isDragging = false;
-    const endX = e.changedTouches[0].clientX;
-    const diff = endX - startX;
-
+    const diff = e.changedTouches[0].clientX - startX;
     carousel.style.transition = "transform 0.4s ease-in-out";
-
-    if (diff < -50 && state.currentCard < state.exercises.length - 1) {
-      showCard(state.currentCard + 1);
-    } else if (diff > 50 && state.currentCard > 0) {
-      showCard(state.currentCard - 1);
-    } else {
-      showCard(state.currentCard);
-    }
+    if (diff < -50 && state.currentCard < state.exercises.length - 1) showCard(state.currentCard + 1);
+    else if (diff > 50 && state.currentCard > 0) showCard(state.currentCard - 1);
+    else showCard(state.currentCard);
   });
 
-  // MOUSE EVENTS (DESKTOP)
+  // MOUSE (desktop)
   carousel.addEventListener("mousedown", e => {
     startX = e.clientX;
     isDragging = true;
@@ -214,16 +208,11 @@ function initDrag() {
   carousel.addEventListener("mouseup", e => {
     if (!isDragging) return;
     isDragging = false;
-    carousel.style.transition = "transform 0.4s ease-in-out";
     const diff = e.clientX - startX;
-
-    if (diff < -50 && state.currentCard < state.exercises.length - 1) {
-      showCard(state.currentCard + 1);
-    } else if (diff > 50 && state.currentCard > 0) {
-      showCard(state.currentCard - 1);
-    } else {
-      showCard(state.currentCard);
-    }
+    carousel.style.transition = "transform 0.4s ease-in-out";
+    if (diff < -50 && state.currentCard < state.exercises.length - 1) showCard(state.currentCard + 1);
+    else if (diff > 50 && state.currentCard > 0) showCard(state.currentCard - 1);
+    else showCard(state.currentCard);
   });
 
   carousel.addEventListener("mouseleave", () => {
@@ -236,31 +225,23 @@ function initDrag() {
 // ------------------------
 function scheduleDailyRefresh() {
   const now = new Date();
-  const nextMidnight = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate() + 1,
-    0, 0, 0, 0
-  );
-
+  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
   const msUntilMidnight = nextMidnight - now;
-  console.log(`Scheduling daily refresh in ${msUntilMidnight / 1000} seconds`);
 
   setTimeout(() => {
-    console.log("Refreshing for new day...");
     loadData();
-    scheduleDailyRefresh(); // reschedule
+    scheduleDailyRefresh();
   }, msUntilMidnight);
 }
 
 // ------------------------
-// Install Prompt (PWA)
+// PWA & DOMContentLoaded
 // ------------------------
 let deferredPrompt;
 window.addEventListener("DOMContentLoaded", () => {
   loadData();
   flushQueue();
-  scheduleDailyRefresh(); // start auto-refresh
+  scheduleDailyRefresh();
 });
 
 // ------------------------
