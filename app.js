@@ -30,10 +30,19 @@ async function loadData() {
     const data = await res.json();
     console.log("DATA:", data);
 
+    // Show current day in the title
     document.getElementById("title").innerText = data.day || "Workout";
 
     // Ensure exercises is always an array
-    state.exercises = Array.isArray(data.next) ? data.next : [];
+    let exercises = Array.isArray(data.next) ? data.next : [];
+
+    // ====== FILTER BY DAY ======
+    // Only show exercises that match the current day from server
+    exercises = exercises.filter(ex => !ex.day || ex.day === data.day);
+    // ===========================
+
+    state.exercises = exercises;
+
     if (!state.exercises.length) {
       console.warn("No exercises returned for today.");
     }
