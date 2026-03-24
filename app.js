@@ -1,3 +1,7 @@
+// ------------------------
+// app.js
+// ------------------------
+
 let userKey = localStorage.getItem("workout_key");
 
 if (!userKey) {
@@ -12,6 +16,9 @@ if (!userKey) {
 
 let state = { exercises: [] };
 
+// ------------------------
+// Load Data from Google Apps Script
+// ------------------------
 async function loadData() {
   try {
     const url = getScriptURL();
@@ -23,19 +30,33 @@ async function loadData() {
     const data = await res.json();
     console.log("DATA:", data);
 
-    document.getElementById("title").innerText = data.day;
-    state.exercises = data.next;
+    document.getElementById("title").innerText = data.day || "Workout";
+
+    // Ensure exercises is always an array
+    state.exercises = Array.isArray(data.next) ? data.next : [];
+    if (!state.exercises.length) {
+      console.warn("No exercises returned for today.");
+    }
 
     render();
   } catch (err) {
     console.error("LOAD ERROR:", err);
     document.getElementById("title").innerText = "Error loading data";
+    state.exercises = [];
   }
 }
 
+// ------------------------
+// Render Exercises
+// ------------------------
 function render() {
   const app = document.getElementById("app");
   app.innerHTML = "";
+
+  if (!state.exercises.length) {
+    app.innerHTML = "<p>No exercises scheduled today.</p>";
+    return;
+  }
 
   state.exercises.forEach((ex, i) => {
     const card = document.createElement("div");
@@ -43,11 +64,11 @@ function render() {
 
     card.innerHTML = `
       <div class="inner">
-        <h3>${ex.name}</h3>
+        <h3>${ex.name || "Unnamed Exercise"}</h3>
         <canvas id="c-${i}"></canvas>
-        <div>Suggested: ${ex.weight}</div>
-        <input id="w-${i}" value="${ex.weight}">
-        <input id="r-${i}" value="${ex.reps}">
+        <div>Suggested: ${ex.weight ?? "-"}</div>
+        <input id="w-${i}" value="${ex.weight ?? ""}">
+        <input id="r-${i}" value="${ex.reps ?? ""}">
         <button onclick="logSet(${i})">Log</button>
       </div>
     `;
@@ -57,7 +78,12 @@ function render() {
   });
 }
 
+// ------------------------
+// Build Chart.js chart
+// ------------------------
 function buildChart(i, history) {
+  if (!history || !Array.isArray(history) || !history.length) return;
+
   new Chart(document.getElementById(`c-${i}`), {
     type: "line",
     data: {
@@ -67,8 +93,12 @@ function buildChart(i, history) {
   });
 }
 
+// ------------------------
+// Log a Set
+// ------------------------
 async function logSet(i) {
   const ex = state.exercises[i];
+  if (!ex) return;
 
   const payload = {
     action: "log",
@@ -87,10 +117,28 @@ async function logSet(i) {
   loadData();
 }
 
-// INSTALL PROMPT
+// ------------------------
+// Install Prompt (PWA)
+// ------------------------
 let deferredPrompt;
-
 window.addEventListener("DOMContentLoaded", () => {
   loadData();
   flushQueue();
 });
+
+// ------------------------
+// Utilities
+// ------------------------
+function getUserKey() {
+  let key = localStorage.getItem("workout_key");
+  if (!key) {
+    key = prompt("Enter your key:");
+    if (key) localStorage.setItem("workout_key", key);
+  }
+  return key;
+}
+
+function getScriptURL() {
+  const key = getUserKey();
+  return `https://script.google.com/macros/s/AKfycbxAP0EAtNUCVj97wxyUZJqQf1XHlv9XFFbbit1HBLIWY-8t0c1DZWqS-PXBDuSGB5jX5Q/exec?key=${key}`;
+}
