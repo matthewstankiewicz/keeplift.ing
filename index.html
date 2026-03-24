@@ -7,12 +7,34 @@
 
 <link rel="manifest" href="./manifest.json">
 <link rel="stylesheet" href="./styles.css">
+<link rel="icon" href="./favicon.ico" type="image/x-icon">
 
 <meta name="theme-color" content="#00FF9C">
 
+<!-- Local Chart.js -->
 <script src="./libs/chart.min.js"></script>
 <script src="./api.js"></script>
 <script src="./app.js"></script>
+
+<style>
+  /* Optional: simple pagination dots style */
+  #pagination {
+    text-align: center;
+    margin: 10px 0;
+  }
+  #pagination .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin: 0 5px;
+    background: #555;
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  #pagination .dot.active {
+    background: #00FF9C;
+  }
+</style>
 </head>
 
 <body>
@@ -22,10 +44,11 @@
   <button id="installBtn">Install</button>
 </div>
 
-<div id="carousel-container">
-  <div id="app"></div>
-  <div id="pagination"></div>
-</div>
+<!-- Carousel container -->
+<div id="app"></div>
+
+<!-- Pagination container -->
+<div id="pagination"></div>
 
 <script>
 if ("serviceWorker" in navigator) {
