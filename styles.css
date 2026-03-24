@@ -1,0 +1,44 @@
+:root {
+  --bg:#000;
+  --card:#111;
+  --text:#fff;
+  --accent:#00FF9C;
+}
+
+body {
+  margin:0;
+  font-family:sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+#header {
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+}
+
+#app {
+  display:flex;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+}
+
+.card {
+  min-width:100vw;
+  padding:15px;
+  scroll-snap-align:center;
+}
+
+.inner {
+  background:var(--card);
+  padding:20px;
+  border-radius:12px;
+}
+
+button {
+  background:var(--accent);
+  border:none;
+  padding:10px;
+  margin-top:10px;
+}
