@@ -156,45 +156,51 @@ function showCard(index) {
 }
 
 // ------------------------
-// Touch Swipe Support
+// Drag / Swipe Support with Live Drag
 // ------------------------
 let startX = 0;
+let currentTranslate = 0;
+let prevTranslate = 0;
 let isDragging = false;
 
 const carousel = document.getElementById("app");
 
-carousel.addEventListener("touchstart", e => {
+carousel.addEventListener("touchstart", touchStart);
+carousel.addEventListener("touchmove", touchMove);
+carousel.addEventListener("touchend", touchEnd);
+
+function touchStart(e) {
   startX = e.touches[0].clientX;
   isDragging = true;
-});
+  carousel.style.transition = "none"; // disable animation while dragging
+}
 
-carousel.addEventListener("touchmove", e => {
+function touchMove(e) {
   if (!isDragging) return;
   const currentX = e.touches[0].clientX;
-  const diff = startX - currentX;
+  const diff = currentX - startX;
+  currentTranslate = -state.currentCard * window.innerWidth + -diff;
+  carousel.style.transform = `translateX(${currentTranslate}px)`;
+}
 
-  // Optional: live drag effect
-  // carousel.style.transform = `translateX(${-state.currentCard * 100 - diff / window.innerWidth * 100}vw)`;
-});
-
-carousel.addEventListener("touchend", e => {
-  if (!isDragging) return;
+function touchEnd(e) {
   isDragging = false;
-
   const endX = e.changedTouches[0].clientX;
-  const diff = startX - endX;
+  const diff = endX - startX;
 
-  if (diff > 50 && state.currentCard < state.exercises.length - 1) {
+  carousel.style.transition = "transform 0.4s ease-in-out"; // restore smooth animation
+
+  if (diff < -50 && state.currentCard < state.exercises.length - 1) {
     // swipe left → next card
     showCard(state.currentCard + 1);
-  } else if (diff < -50 && state.currentCard > 0) {
+  } else if (diff > 50 && state.currentCard > 0) {
     // swipe right → previous card
     showCard(state.currentCard - 1);
   } else {
-    // not enough swipe distance → stay on current card
+    // snap back to current card
     showCard(state.currentCard);
   }
-});
+}
 
 // ------------------------
 // Install Prompt (PWA)
