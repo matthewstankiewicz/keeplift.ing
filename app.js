@@ -89,6 +89,9 @@ function render() {
   state.currentCard = 0;
   showCard(0);
   renderPagination();
+
+  // Initialize swipe/mouse drag
+  initDrag();
 }
 
 // ------------------------
@@ -148,7 +151,7 @@ function renderPagination() {
 function showCard(index) {
   state.currentCard = index;
   const app = document.getElementById("app");
-  app.style.transform = `translateX(-${index * 100}vw)`;
+  app.style.transform = `translateX(${-index * window.innerWidth}px)`;
 
   document.querySelectorAll(".dot").forEach((dot, i) => {
     dot.classList.toggle("active", i === index);
@@ -156,50 +159,77 @@ function showCard(index) {
 }
 
 // ------------------------
-// Drag / Swipe Support with Live Drag
+// Drag / Swipe Support
 // ------------------------
-let startX = 0;
-let currentTranslate = 0;
-let prevTranslate = 0;
-let isDragging = false;
+function initDrag() {
+  const carousel = document.getElementById("app");
 
-const carousel = document.getElementById("app");
+  let startX = 0;
+  let currentTranslate = 0;
+  let isDragging = false;
 
-carousel.addEventListener("touchstart", touchStart);
-carousel.addEventListener("touchmove", touchMove);
-carousel.addEventListener("touchend", touchEnd);
+  // Touch events
+  carousel.addEventListener("touchstart", e => {
+    startX = e.touches[0].clientX;
+    isDragging = true;
+    carousel.style.transition = "none";
+  });
 
-function touchStart(e) {
-  startX = e.touches[0].clientX;
-  isDragging = true;
-  carousel.style.transition = "none"; // disable animation while dragging
-}
+  carousel.addEventListener("touchmove", e => {
+    if (!isDragging) return;
+    const currentX = e.touches[0].clientX;
+    const diff = currentX - startX;
+    currentTranslate = -state.currentCard * window.innerWidth + -diff;
+    carousel.style.transform = `translateX(${currentTranslate}px)`;
+  });
 
-function touchMove(e) {
-  if (!isDragging) return;
-  const currentX = e.touches[0].clientX;
-  const diff = currentX - startX;
-  currentTranslate = -state.currentCard * window.innerWidth + -diff;
-  carousel.style.transform = `translateX(${currentTranslate}px)`;
-}
+  carousel.addEventListener("touchend", e => {
+    isDragging = false;
+    const endX = e.changedTouches[0].clientX;
+    const diff = endX - startX;
 
-function touchEnd(e) {
-  isDragging = false;
-  const endX = e.changedTouches[0].clientX;
-  const diff = endX - startX;
+    carousel.style.transition = "transform 0.4s ease-in-out";
 
-  carousel.style.transition = "transform 0.4s ease-in-out"; // restore smooth animation
+    if (diff < -50 && state.currentCard < state.exercises.length - 1) {
+      showCard(state.currentCard + 1);
+    } else if (diff > 50 && state.currentCard > 0) {
+      showCard(state.currentCard - 1);
+    } else {
+      showCard(state.currentCard);
+    }
+  });
 
-  if (diff < -50 && state.currentCard < state.exercises.length - 1) {
-    // swipe left → next card
-    showCard(state.currentCard + 1);
-  } else if (diff > 50 && state.currentCard > 0) {
-    // swipe right → previous card
-    showCard(state.currentCard - 1);
-  } else {
-    // snap back to current card
-    showCard(state.currentCard);
-  }
+  // Mouse events for desktop
+  carousel.addEventListener("mousedown", e => {
+    startX = e.clientX;
+    isDragging = true;
+    carousel.style.transition = "none";
+  });
+
+  carousel.addEventListener("mousemove", e => {
+    if (!isDragging) return;
+    const diff = e.clientX - startX;
+    currentTranslate = -state.currentCard * window.innerWidth + -diff;
+    carousel.style.transform = `translateX(${currentTranslate}px)`;
+  });
+
+  carousel.addEventListener("mouseup", e => {
+    if (!isDragging) return;
+    isDragging = false;
+    carousel.style.transition = "transform 0.4s ease-in-out";
+    const diff = e.clientX - startX;
+    if (diff < -50 && state.currentCard < state.exercises.length - 1) {
+      showCard(state.currentCard + 1);
+    } else if (diff > 50 && state.currentCard > 0) {
+      showCard(state.currentCard - 1);
+    } else {
+      showCard(state.currentCard);
+    }
+  });
+
+  carousel.addEventListener("mouseleave", () => {
+    if (isDragging) showCard(state.currentCard);
+  });
 }
 
 // ------------------------
