@@ -30,7 +30,6 @@ async function loadData() {
     const data = await res.json();
     console.log("DATA:", data);
 
-    // Show current day in the title
     document.getElementById("title").innerText = data.day || "Workout";
 
     // Ensure exercises is always an array
@@ -90,7 +89,7 @@ function render() {
   showCard(0);
   renderPagination();
 
-  // Initialize swipe/mouse drag
+  // Initialize swipe/mouse drag after cards exist
   initDrag();
 }
 
@@ -163,12 +162,13 @@ function showCard(index) {
 // ------------------------
 function initDrag() {
   const carousel = document.getElementById("app");
+  if (!carousel) return; // <--- prevent null errors
 
   let startX = 0;
   let currentTranslate = 0;
   let isDragging = false;
 
-  // Touch events
+  // TOUCH EVENTS
   carousel.addEventListener("touchstart", e => {
     startX = e.touches[0].clientX;
     isDragging = true;
@@ -199,7 +199,7 @@ function initDrag() {
     }
   });
 
-  // Mouse events for desktop
+  // MOUSE EVENTS (DESKTOP)
   carousel.addEventListener("mousedown", e => {
     startX = e.clientX;
     isDragging = true;
@@ -218,6 +218,7 @@ function initDrag() {
     isDragging = false;
     carousel.style.transition = "transform 0.4s ease-in-out";
     const diff = e.clientX - startX;
+
     if (diff < -50 && state.currentCard < state.exercises.length - 1) {
       showCard(state.currentCard + 1);
     } else if (diff > 50 && state.currentCard > 0) {
