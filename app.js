@@ -1,3 +1,10 @@
+let userKey = localStorage.getItem("workout_key");
+
+if (!userKey) {
+  userKey = prompt("Enter your key:");
+  localStorage.setItem("workout_key", userKey);
+}
+
 let state = { exercises: [] };
 
 async function loadData() {
