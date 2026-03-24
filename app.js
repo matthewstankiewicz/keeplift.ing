@@ -156,6 +156,47 @@ function showCard(index) {
 }
 
 // ------------------------
+// Touch Swipe Support
+// ------------------------
+let startX = 0;
+let isDragging = false;
+
+const carousel = document.getElementById("app");
+
+carousel.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+  isDragging = true;
+});
+
+carousel.addEventListener("touchmove", e => {
+  if (!isDragging) return;
+  const currentX = e.touches[0].clientX;
+  const diff = startX - currentX;
+
+  // Optional: live drag effect
+  // carousel.style.transform = `translateX(${-state.currentCard * 100 - diff / window.innerWidth * 100}vw)`;
+});
+
+carousel.addEventListener("touchend", e => {
+  if (!isDragging) return;
+  isDragging = false;
+
+  const endX = e.changedTouches[0].clientX;
+  const diff = startX - endX;
+
+  if (diff > 50 && state.currentCard < state.exercises.length - 1) {
+    // swipe left → next card
+    showCard(state.currentCard + 1);
+  } else if (diff < -50 && state.currentCard > 0) {
+    // swipe right → previous card
+    showCard(state.currentCard - 1);
+  } else {
+    // not enough swipe distance → stay on current card
+    showCard(state.currentCard);
+  }
+});
+
+// ------------------------
 // Install Prompt (PWA)
 // ------------------------
 let deferredPrompt;
