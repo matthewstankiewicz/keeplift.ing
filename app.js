@@ -1,8 +1,13 @@
 let userKey = localStorage.getItem("workout_key");
 
 if (!userKey) {
-  userKey = prompt("Enter your key:");
-  localStorage.setItem("workout_key", userKey);
+  setTimeout(() => {
+    userKey = prompt("Enter your key:");
+    if (userKey) {
+      localStorage.setItem("workout_key", userKey);
+      location.reload();
+    }
+  }, 500);
 }
 
 let state = { exercises: [] };
