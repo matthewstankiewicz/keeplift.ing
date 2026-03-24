@@ -14,7 +14,7 @@ if (!userKey) {
   }, 500);
 }
 
-let state = { exercises: [] };
+let state = { exercises: [], currentCard: 0 };
 
 // ------------------------
 // Load Data from Google Apps Script
@@ -36,10 +36,8 @@ async function loadData() {
     // Ensure exercises is always an array
     let exercises = Array.isArray(data.next) ? data.next : [];
 
-    // ====== FILTER BY DAY ======
-    // Only show exercises that match the current day from server
+    // Filter exercises for current day
     exercises = exercises.filter(ex => !ex.day || ex.day === data.day);
-    // ===========================
 
     state.exercises = exercises;
 
@@ -64,6 +62,7 @@ function render() {
 
   if (!state.exercises.length) {
     app.innerHTML = "<p>No exercises scheduled today.</p>";
+    document.getElementById("pagination").innerHTML = "";
     return;
   }
 
@@ -85,6 +84,11 @@ function render() {
     app.appendChild(card);
     buildChart(i, ex.history);
   });
+
+  // Show first card and render pagination
+  state.currentCard = 0;
+  showCard(0);
+  renderPagination();
 }
 
 // ------------------------
@@ -124,6 +128,31 @@ async function logSet(i) {
   }
 
   loadData();
+}
+
+// ------------------------
+// Pagination Functions
+// ------------------------
+function renderPagination() {
+  const pagination = document.getElementById("pagination");
+  pagination.innerHTML = "";
+
+  state.exercises.forEach((_, i) => {
+    const dot = document.createElement("span");
+    dot.className = "dot" + (i === state.currentCard ? " active" : "");
+    dot.addEventListener("click", () => showCard(i));
+    pagination.appendChild(dot);
+  });
+}
+
+function showCard(index) {
+  state.currentCard = index;
+  const app = document.getElementById("app");
+  app.style.transform = `translateX(-${index * 100}vw)`;
+
+  document.querySelectorAll(".dot").forEach((dot, i) => {
+    dot.classList.toggle("active", i === index);
+  });
 }
 
 // ------------------------
