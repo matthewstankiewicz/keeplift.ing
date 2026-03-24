@@ -13,13 +13,18 @@ if (!userKey) {
 let state = { exercises: [] };
 
 async function loadData() {
-  const res = await fetch(getScriptURL());
-  const data = await res.json();
+  try {
+    const res = await fetch(getScriptURL());
+    const data = await res.json();
 
-  document.getElementById("title").innerText = data.day;
+    document.getElementById("title").innerText = data.day;
+    state.exercises = data.next;
 
-  state.exercises = data.next;
-  render();
+    render();
+  } catch (err) {
+    console.error("LOAD ERROR:", err);
+    document.getElementById("title").innerText = "Error loading data";
+  }
 }
 
 function render() {
