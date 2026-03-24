@@ -18,16 +18,22 @@ body {
   justify-content:space-between;
 }
 
+#carousel-container {
+  position: relative;
+  width: 100vw;
+  overflow: hidden; /* hides scrollbar */
+}
+
 #app {
-  display:flex;
-  overflow-x:auto;
-  scroll-snap-type:x mandatory;
+  display: flex;
+  transition: transform 0.4s ease-in-out;
+  width: 100%;
 }
 
 .card {
-  min-width:100vw;
-  padding:15px;
-  scroll-snap-align:center;
+  min-width: 100%;
+  padding: 15px;
+  box-sizing: border-box;
 }
 
 .inner {
@@ -41,4 +47,24 @@ button {
   border:none;
   padding:10px;
   margin-top:10px;
+}
+
+/* Pagination Dots */
+#pagination {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.dot {
+  height: 12px;
+  width: 12px;
+  margin: 0 5px;
+  display: inline-block;
+  border-radius: 50%;
+  background-color: #555;
+  cursor: pointer;
+}
+
+.dot.active {
+  background-color: var(--accent);
 }
