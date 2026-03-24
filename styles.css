@@ -1,70 +1,99 @@
+/* ------------------------
+   Root Colors
+------------------------ */
 :root {
-  --bg:#000;
-  --card:#111;
-  --text:#fff;
-  --accent:#00FF9C;
+  --bg: #000;
+  --card: #111;
+  --text: #fff;
+  --accent: #00FF9C;
 }
 
+/* ------------------------
+   Body
+------------------------ */
 body {
-  margin:0;
-  font-family:sans-serif;
-  background:var(--bg);
-  color:var(--text);
+  margin: 0;
+  font-family: sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden; /* prevent horizontal scrollbar */
 }
 
+/* ------------------------
+   Header
+------------------------ */
 #header {
-  padding:10px;
-  display:flex;
-  justify-content:space-between;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-#carousel-container {
-  position: relative;
-  width: 100vw;
-  overflow: hidden; /* hides scrollbar */
-}
-
+/* ------------------------
+   Carousel Container
+------------------------ */
 #app {
   display: flex;
+  width: 100vw;
+  height: calc(100vh - 100px); /* adjust for header + pagination */
+  overflow: hidden; /* hide scrollbars */
   transition: transform 0.4s ease-in-out;
-  width: 100%;
-}
-
-.card {
-  min-width: 100%;
-  padding: 15px;
+  padding: 0 10vw; /* peek space on sides */
   box-sizing: border-box;
 }
 
+/* ------------------------
+   Each Card
+------------------------ */
+.card {
+  flex-shrink: 0;
+  width: 80vw; /* slightly smaller than container */
+  margin: 0 1vw; /* small gap between cards */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  scroll-snap-align: start;
+}
+
+/* ------------------------
+   Card Inner Content
+------------------------ */
 .inner {
-  background:var(--card);
-  padding:20px;
-  border-radius:12px;
+  background: var(--card);
+  padding: 20px;
+  border-radius: 12px;
+  width: 100%;
 }
 
+/* ------------------------
+   Buttons
+------------------------ */
 button {
-  background:var(--accent);
-  border:none;
-  padding:10px;
-  margin-top:10px;
-}
-
-/* Pagination Dots */
-#pagination {
-  text-align: center;
+  background: var(--accent);
+  border: none;
+  padding: 10px;
   margin-top: 10px;
-}
-
-.dot {
-  height: 12px;
-  width: 12px;
-  margin: 0 5px;
-  display: inline-block;
-  border-radius: 50%;
-  background-color: #555;
   cursor: pointer;
 }
 
-.dot.active {
-  background-color: var(--accent);
+/* ------------------------
+   Pagination Dots
+------------------------ */
+#pagination {
+  text-align: center;
+  padding: 10px 0;
+}
+
+#pagination .dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 0 5px;
+  background: #555;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+#pagination .dot.active {
+  background: var(--accent);
 }
