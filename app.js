@@ -39,8 +39,8 @@ function render() {
       <div class="inner">
         <h3>${ex.name}</h3>
         <canvas id="c-${i}"></canvas>
-        <div>Suggested: ${ex.suggestedWeight}</div>
-        <input id="w-${i}" value="${ex.suggestedWeight}">
+        <div>Suggested: ${ex.weight}</div>
+        <input id="w-${i}" value="${ex.weight}">
         <input id="r-${i}" value="${ex.reps}">
         <button onclick="logSet(${i})">Log</button>
       </div>
