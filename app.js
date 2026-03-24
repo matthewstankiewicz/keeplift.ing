@@ -8,7 +8,7 @@ if (!userKey) {
 let state = { exercises: [] };
 
 async function loadData() {
-  const res = await fetch(scriptURL);
+  const res = await fetch(getScriptURL());
   const data = await res.json();
 
   document.getElementById("title").innerText = data.day;
